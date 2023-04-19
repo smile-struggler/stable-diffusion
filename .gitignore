@@ -1,0 +1,10 @@
+logs/
+outputs/
+mel_files/
+__pycache__/
+
+*.wav
+*.png
+*.npy
+*.pt
+*.ckpt
