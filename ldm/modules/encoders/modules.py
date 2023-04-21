@@ -159,6 +159,8 @@ class FrozenCLIPEmbedder(AbstractEncoder):
         return z
 
     def encode(self, text):
+        import pdb
+        pdb.set_trace()
         return self(text)
 
 

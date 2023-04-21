@@ -177,9 +177,9 @@ class DataModuleFromConfig(pl.LightningDataModule):
         if test is not None:
             self.dataset_configs["test"] = test
             self.test_dataloader = partial(self._test_dataloader, shuffle=shuffle_test_loader)
-        if predict is not None:
-            self.dataset_configs["predict"] = predict
-            self.predict_dataloader = self._predict_dataloader
+        # if predict is not None:
+        #     self.dataset_configs["predict"] = predict
+        #     self.predict_dataloader = self._predict_dataloader
         self.wrap = wrap
 
     def prepare_data(self):
@@ -228,14 +228,28 @@ class DataModuleFromConfig(pl.LightningDataModule):
         return DataLoader(self.datasets["test"], batch_size=self.batch_size,
                           num_workers=self.num_workers, worker_init_fn=init_fn, shuffle=shuffle)
 
-    def _predict_dataloader(self, shuffle=False):
-        if isinstance(self.datasets['predict'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
-            init_fn = worker_init_fn
-        else:
-            init_fn = None
-        return DataLoader(self.datasets["predict"], batch_size=self.batch_size,
-                          num_workers=self.num_workers, worker_init_fn=init_fn)
+    # def _predict_dataloader(self, shuffle=False):
+    #     if isinstance(self.datasets['predict'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
+    #         init_fn = worker_init_fn
+    #     else:
+    #         init_fn = None
+    #     return DataLoader(self.datasets["predict"], batch_size=self.batch_size,
+    #                       num_workers=self.num_workers, worker_init_fn=init_fn)
 
+class SpectrogramDataModuleFromConfig(DataModuleFromConfig):
+    '''avoiding duplication of hyper-parameters in the config by gross patching here '''
+    def __init__(self, batch_size, num_workers, data_path=None,total_num=None,
+                    duration=None, train=None, validation=None, test=None, wrap=False):
+        specs_dataset_cfg = {
+            # 'spec_dir_name': Path(spec_dir_path).name,
+            'data_path': data_path,
+            'total_num': total_num,
+            'duration': duration,
+        }
+        for name, split in {'train': train, 'validation': validation, 'test': test}.items():
+            if split is not None:
+                split.params.specs_dataset_cfg = specs_dataset_cfg
+        super().__init__(batch_size, train, validation, test, wrap, num_workers)
 
 class SetupCallback(Callback):
     def __init__(self, resume, now, logdir, ckptdir, cfgdir, config, lightning_config):
