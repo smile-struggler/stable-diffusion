@@ -8,6 +8,7 @@ model:
   base_learning_rate: 1.0e-04
   target: ldm.models.diffusion.ddpm_tts.LatentDiffusion
   params:
+    find_unused_parameters: False
     linear_start: 0.00085
     linear_end: 0.0120
     num_timesteps_cond: 1
@@ -21,7 +22,6 @@ model:
     conditioning_key: crossattn
     monitor: val/loss_simple_ema
     scale_factor: 0.18215
-    use_ema: False
 
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler
@@ -39,9 +39,9 @@ model:
         in_channels: 8
         out_channels: 8
         model_channels: 256
-        attention_resolutions: [ 4, 2, 1 ]
+        attention_resolutions: [  1 ]
         num_res_blocks: 1
-        channel_mult: [  1]
+        channel_mult: [ 1]
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
@@ -87,7 +87,7 @@ model:
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 4
+    batch_size: 1
     num_workers: 4
 
     train:
@@ -119,5 +119,5 @@ lightning:
   trainer:
     #replace_sampler_ddp: False
     benchmark: True
-    val_check_interval: 500
+    val_check_interval: 400
     num_sanity_val_steps: 0

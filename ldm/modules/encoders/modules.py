@@ -156,11 +156,13 @@ class FrozenCLIPEmbedder(AbstractEncoder):
         outputs = self.transformer(input_ids=tokens)
 
         z = outputs.last_hidden_state
+        import pdb
+        pdb.set_trace()
         return z
 
     def encode(self, text):
         import pdb
-        pdb.set_trace()
+        # pdb.set_trace()
         return self(text)
 
 

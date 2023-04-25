@@ -289,10 +289,7 @@ def hf_dataset(
     def pre_process(examples):
         processed = {}
         processed[image_key] = [tform(im) for im in examples[image_column]]
-        processed[caption_key] = []
-        for i in examples[text_column]:
-            processed[caption_key].append([i,'test',123])
-            # [examples[text_column],'test',123]
+        processed[caption_key] = examples[text_column]
         return processed
 
     ds.set_transform(pre_process)
