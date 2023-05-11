@@ -168,6 +168,8 @@ class CrossAttention(nn.Module):
         )
 
     def forward(self, x, context=None, mask=None):
+        temp_context = context
+        # print('context:',context)
         h = self.heads
 
         q = self.to_q(x)
@@ -187,6 +189,9 @@ class CrossAttention(nn.Module):
 
         # attention, what we cannot get enough of
         attn = sim.softmax(dim=-1)
+
+        # if temp_context is not None:
+        #     import pdb;pdb.set_trace()
 
         out = einsum('b i j, b j d -> b i d', attn, v)
         out = rearrange(out, '(b h) n d -> b n (h d)', h=h)

@@ -41,7 +41,7 @@ model:
         model_channels: 256
         attention_resolutions: [ 4, 2, 1 ]
         num_res_blocks: 1
-        channel_mult: [  1]
+        channel_mult: [ 1, 2, 4, 4 ]
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
@@ -88,7 +88,7 @@ data:
   target: main.DataModuleFromConfig
   params:
     batch_size: 4
-    num_workers: 4
+    num_workers: 1
 
     train:
       target: ldm.data.libritts_ldm.LibriTTSSpecsTrain

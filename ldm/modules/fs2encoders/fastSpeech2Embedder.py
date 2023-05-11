@@ -82,7 +82,6 @@ class fastSpeech2Embedder(AbstractEncoder):
             if mel_lens is not None
             else None
         )
-
         output = self.model.encoder(texts, src_masks)
 
         if self.speaker_emb is not None:
@@ -110,10 +109,13 @@ class fastSpeech2Embedder(AbstractEncoder):
             e_control,
             d_control,
         )
+
+        output = self.model.decoder.addPosition(output)
         # return (
         #     output, mel_masks
         # )
-
+        # import pdb
+        # pdb.set_trace()
         return output
     
     def encode(self, 

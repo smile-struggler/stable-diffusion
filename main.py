@@ -582,7 +582,7 @@ if __name__ == "__main__":
         if hasattr(model, "monitor"):
             print(f"Monitoring {model.monitor} as checkpoint metric.")
             default_modelckpt_cfg["params"]["monitor"] = model.monitor
-            default_modelckpt_cfg["params"]["save_top_k"] = 3
+            default_modelckpt_cfg["params"]["save_top_k"] = 5
 
         if "modelcheckpoint" in lightning_config:
             modelckpt_cfg = lightning_config.modelcheckpoint
@@ -607,14 +607,14 @@ if __name__ == "__main__":
                     "lightning_config": lightning_config,
                 }
             },
-            "image_logger": {
-                "target": "main.ImageLogger",
-                "params": {
-                    "batch_frequency": 750,
-                    "max_images": 4,
-                    "clamp": True
-                }
-            },
+            # "image_logger": {
+            #     "target": "main.ImageLogger",
+            #     "params": {
+            #         "batch_frequency": 1,
+            #         "max_images": 4,
+            #         "clamp": True
+            #     }
+            # },
             "learning_rate_logger": {
                 "target": "main.LearningRateMonitor",
                 "params": {

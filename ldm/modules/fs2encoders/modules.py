@@ -146,7 +146,6 @@ class VarianceAdaptor(nn.Module):
                 x, energy_target, mel_mask, p_control
             )
             x = x + energy_embedding
-
         return (
             x,
             pitch_prediction,

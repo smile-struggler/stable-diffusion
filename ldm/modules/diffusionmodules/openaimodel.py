@@ -716,6 +716,7 @@ class UNetModel(nn.Module):
         :param y: an [N] Tensor of labels, if class-conditional.
         :return: an [N x C x ...] Tensor of outputs.
         """
+        import pdb;pdb.set_trace()
         assert (y is not None) == (
             self.num_classes is not None
         ), "must specify y if and only if the model is class-conditional"
@@ -729,11 +730,14 @@ class UNetModel(nn.Module):
 
         h = x.type(self.dtype)
         for module in self.input_blocks:
+            # import pdb;pdb.set_trace();
             h = module(h, emb, context)
             hs.append(h)
         h = self.middle_block(h, emb, context)
         for module in self.output_blocks:
-            h = th.cat([h, hs.pop()], dim=1)
+            temp=hs.pop()
+            h = th.cat([h, temp], dim=1)
+            
             h = module(h, emb, context)
         h = h.type(x.dtype)
         if self.predict_codebook_ids:

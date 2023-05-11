@@ -1,0 +1,76 @@
+fs2config: &fs2config
+  preprocess_config: &preprocess_config configs/fastspeech2/LJSpeech/preprocess.yaml
+  model_config: &model_config configs/fastspeech2/LJSpeech/model.yaml
+  train_config: &train_config configs/fastspeech2/LJSpeech/train.yaml
+  ckpt_path: &ckpt_path /work100/chenrenmiao/Project/FastSpeech2/output/ckpt/LJSpeech/900000.pth.tar
+
+model:
+  base_learning_rate: 2.0e-05
+  target: ldm.models.diffusion.ddpm_tts.LatentDiffusion
+  params:
+    linear_start: 0.00085
+    linear_end: 0.0120
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    first_stage_key: "image"
+    cond_stage_key: "txt"
+    image_size: 20
+    channels: 8
+    cond_stage_trainable: false   # Note: different from the one we trained before
+    conditioning_key: crossattn
+    monitor: val/loss_simple_ema
+    scale_factor: 0.18215
+
+    scheduler_config: # 10000 warmup steps
+      target: ldm.lr_scheduler.LambdaLinearScheduler
+      params:
+        warm_up_steps: [ 10000 ]
+        cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
+        f_start: [ 1.e-6 ]
+        f_max: [ 1. ]
+        f_min: [ 1. ]
+
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 32
+        in_channels: 8
+        out_channels: 8
+        model_channels: 256
+        attention_resolutions: [ 4, 2, 1 ]
+        num_res_blocks: 1
+        channel_mult: [ 1, 2, 4]
+        num_heads: 8
+        use_spatial_transformer: True
+        transformer_depth: 1
+        context_dim: 256
+        use_checkpoint: True
+        legacy: False
+
+    first_stage_config:
+      target: ldm.models.autoencoder.AutoencoderKL
+      params:
+        embed_dim: 8
+        monitor: val/rec_loss
+        ddconfig:
+          double_z: true
+          z_channels: 8
+          resolution: 256
+          in_channels: 1
+          out_ch: 1
+          ch: 128
+          ch_mult:
+          - 1
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions: []
+          dropout: 0.0
+        lossconfig:
+          target: torch.nn.Identity
+
+    cond_stage_config:
+      target: ldm.modules.fs2encoders.fastSpeech2Embedder.fastSpeech2Embedder
+      params:
+        <<: *fs2config

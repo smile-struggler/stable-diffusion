@@ -108,15 +108,22 @@ class LibriTTSSpecs(Dataset):
         energies = [data[idx]["energy"] for idx in idxs]
         durations = [data[idx]["duration"] for idx in idxs]
 
-        text_lens = np.array([text.shape[0] for text in texts])
-        mel_lens = np.array([mel.shape[0] for mel in mels])
-
+        ori_mel_lens = max(np.array([mel.shape[0] for mel in mels]))
+        scale_num = 32
+        if ori_mel_lens % scale_num != 0:
+            new_mel_lens = (ori_mel_lens // scale_num) * scale_num + scale_num
+        else:
+            new_mel_lens = ori_mel_lens
+  
         speakers = np.array(speakers)
         texts = pad_1D(texts)
-        mels = pad_2D(mels)
+        mels = pad_2D(mels,maxlen=new_mel_lens)
         pitches = pad_1D(pitches)
         energies = pad_1D(energies)
         durations = pad_1D(durations)
+
+        text_lens = np.array([text.shape[0] for text in texts])
+        mel_lens = np.array([mel.shape[0] for mel in mels])
 
         return (
             ids,

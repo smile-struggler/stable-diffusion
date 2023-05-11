@@ -5,10 +5,9 @@ fs2config: &fs2config
   ckpt_path: &ckpt_path /work100/chenrenmiao/Project/FastSpeech2/output/ckpt/LJSpeech/900000.pth.tar
 
 model:
-  base_learning_rate: 1.0e-04
+  base_learning_rate: 2.0e-05
   target: ldm.models.diffusion.ddpm_tts.LatentDiffusion
   params:
-    find_unused_parameters: False
     linear_start: 0.00085
     linear_end: 0.0120
     num_timesteps_cond: 1
@@ -16,7 +15,7 @@ model:
     timesteps: 1000
     first_stage_key: "image"
     cond_stage_key: "txt"
-    image_size: 32
+    image_size: 20
     channels: 8
     cond_stage_trainable: false   # Note: different from the one we trained before
     conditioning_key: crossattn
@@ -39,9 +38,9 @@ model:
         in_channels: 8
         out_channels: 8
         model_channels: 256
-        attention_resolutions: [  1 ]
+        attention_resolutions: [ 4, 2, 1 ]
         num_res_blocks: 1
-        channel_mult: [ 1]
+        channel_mult: [ 1, 2, 4]
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
@@ -87,7 +86,7 @@ model:
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 1
+    batch_size: 2
     num_workers: 4
 
     train:
@@ -106,18 +105,19 @@ data:
 
 
 lightning:
-  callbacks:
-    image_logger:
-      target: main.ImageLogger
-      params:
-        batch_frequency: 5000
-        max_images: 8
-        increase_log_steps: False
-        log_first_step: False
+  # callbacks:
+  #   image_logger:
+  #     target: main.ImageLogger
+  #     params:
+  #       batch_frequency: 5000
+  #       max_images: 1
+  #       increase_log_steps: False
+  #       log_first_step: True
 
 
   trainer:
     #replace_sampler_ddp: False
     benchmark: True
-    val_check_interval: 400
-    num_sanity_val_steps: 0
+    every_n_epochs: 1
+    # val_check_interval: 400
+    # num_sanity_val_steps: 0

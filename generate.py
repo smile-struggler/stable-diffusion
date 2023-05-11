@@ -33,6 +33,10 @@ def load_model_from_config(config, ckpt):
 def get_model():
     path_conf = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-03-28T13-32-38_melvae/configs/2023-03-28T13-32-38-project.yaml'
     path_ckpt = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-03-28T13-32-38_melvae/checkpoints/epoch=000014.ckpt'
+
+    # path_conf = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-04-25T16-15-14_melvae/configs/2023-04-25T16-15-14-project.yaml'
+    # path_ckpt = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-04-25T16-15-14_melvae/checkpoints/epoch=000006.ckpt'
+    
     config = OmegaConf.load(path_conf)
     model, step = load_model_from_config(config, path_ckpt)
     return model
@@ -97,9 +101,10 @@ with torch.no_grad():
 print('reconstruction.shape',reconstruction.shape)
 reconstruction = np.squeeze(reconstruction)
 # reconstruction = reconstruction.numpy()
-print(reconstruction.shape)
+print('reconstruction.shape',reconstruction.shape)
 print(S)
 print(reconstruction)
+import pdb;pdb.set_trace()
 
 with open(HIFIGAN_CONFIG) as f:
     h = AttrDict(json.load(f))
