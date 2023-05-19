@@ -373,8 +373,8 @@ def main():
                             uc = uc.repeat(1, c.shape[1] // uc.shape[1], 1)
                         print('c.shape', c.shape)
 
-                        start_code = torch.randn([opt.n_samples, 8, c.shape[1] // 4, 20], device=device)
-                        shape = [8, c.shape[1] // 4, 20]
+                        start_code = torch.randn([opt.n_samples, 4, c.shape[1] // 4, 20], device=device)
+                        shape = [4, c.shape[1] // 4, 20]
                         samples_ddim, _ = sampler.sample(S=opt.ddim_steps,
                                                          conditioning=c,
                                                          batch_size=opt.n_samples,
@@ -404,10 +404,10 @@ def main():
                             x_sample = x_sample.permute(1,0)
                             x_sample = x_sample.float()
                             audio_new = (vocoder.forward(x_sample.to(torch.device('cuda:0'))).float().cpu().squeeze().clamp(-1, 1).numpy() * 32768).astype(np.int16)
-                            write(f'./results/tts_{id}.wav', 22050, audio_new)
-                            y_inv = librosa.feature.inverse.mel_to_audio(x_sample.cpu().numpy(), sr=22050,n_fft=1024,
-                                hop_length = 256, win_length = 1024)
-                            soundfile.write(f"./results/tts_Griffin-Lim_{id}.wav", y_inv, 22050)
+                            write(f'./results/tts_scale3_{id}.wav', 22050, audio_new)
+                            # y_inv = librosa.feature.inverse.mel_to_audio(x_sample.cpu().numpy(), sr=22050,n_fft=1024,
+                            #     hop_length = 256, win_length = 1024)
+                            # soundfile.write(f"./results/tts_Griffin-Lim_{id}.wav", y_inv, 22050)
 
                 #         if not opt.skip_save:
                 #             for x_sample in x_checked_image_torch:

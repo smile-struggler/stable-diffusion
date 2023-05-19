@@ -31,11 +31,11 @@ def load_model_from_config(config, ckpt):
     return {"model": model}, global_step
 
 def get_model():
-    path_conf = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-03-28T13-32-38_melvae/configs/2023-03-28T13-32-38-project.yaml'
-    path_ckpt = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-03-28T13-32-38_melvae/checkpoints/epoch=000014.ckpt'
+    # path_conf = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-03-28T13-32-38_melvae/configs/2023-03-28T13-32-38-project.yaml'
+    # path_ckpt = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-03-28T13-32-38_melvae/checkpoints/epoch=000014.ckpt'
 
-    # path_conf = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-04-25T16-15-14_melvae/configs/2023-04-25T16-15-14-project.yaml'
-    # path_ckpt = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-04-25T16-15-14_melvae/checkpoints/epoch=000006.ckpt'
+    path_conf = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-04-26T11-00-39_melvae/configs/2023-04-26T11-00-39-project.yaml'
+    path_ckpt = '/work100/chenrenmiao/Project/230323-stablediffusion/logs/2023-04-26T11-00-39_melvae/checkpoints/epoch=000014.ckpt'
     
     config = OmegaConf.load(path_conf)
     model, step = load_model_from_config(config, path_ckpt)
@@ -80,8 +80,8 @@ with torch.no_grad():
     z = posterior.sample()
     
     print('posterior.shape',posterior.mean.shape)
-    print('posterior.mean',posterior.mean)
-    print('posterior.std',posterior.std)
+    # print('posterior.mean',posterior.mean)
+    # print('posterior.std',posterior.std)
     # print('posterior.logvar',posterior.logvar)
     # print('z.content:',z)
     # z = z + torch.randn(z.shape).to(device=posterior.parameters.device)
@@ -104,7 +104,6 @@ reconstruction = np.squeeze(reconstruction)
 print('reconstruction.shape',reconstruction.shape)
 print(S)
 print(reconstruction)
-import pdb;pdb.set_trace()
 
 with open(HIFIGAN_CONFIG) as f:
     h = AttrDict(json.load(f))
