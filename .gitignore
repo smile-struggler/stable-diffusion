@@ -3,6 +3,8 @@ outputs/
 mel_files/
 __pycache__/
 process_logs/
+taming-transformers/
+CLIP/
 
 *.wav
 *.png
