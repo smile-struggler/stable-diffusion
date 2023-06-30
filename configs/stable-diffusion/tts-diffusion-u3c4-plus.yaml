@@ -37,9 +37,9 @@ model:
         image_size: 32
         in_channels: 4
         out_channels: 4
-        model_channels: 256
+        model_channels: 320
         attention_resolutions: [ 4, 2, 1 ]
-        num_res_blocks: 1
+        num_res_blocks: 2
         channel_mult: [ 1, 2, 4]
         num_heads: 8
         use_spatial_transformer: True

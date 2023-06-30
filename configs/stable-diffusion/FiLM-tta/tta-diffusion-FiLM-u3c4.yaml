@@ -1,40 +1,37 @@
-fs2config: &fs2config
-  preprocess_config: &preprocess_config configs/fastspeech2/LJSpeech/preprocess.yaml
-  model_config: &model_config configs/fastspeech2/LJSpeech/model.yaml
-  train_config: &train_config configs/fastspeech2/LJSpeech/train.yaml
-  ckpt_path: &ckpt_path /data/home/scv9359/run/Code/stable-diffusion/logs/900000.pth.tar
-
 model:
-  base_learning_rate: 2.0e-05
-  target: ldm.models.diffusion.ddpm_tts.LatentDiffusion
+  base_learning_rate: 5.0e-06
+  target: ldm.models.diffusion.ddpm_tta.LatentDiffusion
+  max_epochs: 1
   params:
     linear_start: 0.00085
     linear_end: 0.0120
     num_timesteps_cond: 1
     log_every_t: 200
     timesteps: 1000
-    first_stage_key: "image"
-    cond_stage_key: "txt"
+    first_stage_key: "mel"
+    cond_stage_key: "audio"
     image_size: 20
     channels: 4
     cond_stage_trainable: false   # Note: different from the one we trained before
-    conditioning_key: crossattn
+    conditioning_key: film
     monitor: val/loss_simple_ema
     scale_factor: 0.18215
 
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler
       params:
-        warm_up_steps: [ 10000 ]
+        warm_up_steps: [ 5000 ]
         cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
         f_start: [ 1.e-6 ]
         f_max: [ 1. ]
         f_min: [ 1. ]
 
     unet_config:
-      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      target: ldm.modules.diffusionmodules.FiLM_openaimodel.UNetModel
       params:
         image_size: 32
+        extra_film_condition_dim: 512
+        extra_film_use_concat: True
         in_channels: 4
         out_channels: 4
         model_channels: 256
@@ -44,7 +41,7 @@ model:
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
-        context_dim: 256
+        context_dim: 512
         use_checkpoint: True
         legacy: False
 
@@ -77,31 +74,27 @@ model:
           dropout: 0.0
 
     cond_stage_config:
-      target: ldm.modules.fs2encoders.fastSpeech2Embedder.fastSpeech2Embedder
-      params:
-        <<: *fs2config
-
-
+      target: ldm.modules.CLAPencoders.modules.FrozenClapAudioEmbedder
 
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 2
+    batch_size: 6
     num_workers: 4
 
     train:
-      target: ldm.data.libritts_ldm.LibriTTSSpecsTrain
+      target: ldm.data.audioset_ldm.AudioSetSpecsTrain
       params:
+        filedir: '/data/home/scv9359/run/data/audiocaps'
         filename: 'train.txt'
-        preprocess_config: *preprocess_config
-        train_config: *train_config
+        filetype: 'train'
 
     validation:
-      target: ldm.data.libritts_ldm.LibriTTSSpecsValidation
+      target: ldm.data.audioset_ldm.AudioSetSpecsValidation
       params:
+        filedir: '/data/home/scv9359/run/data/audiocaps'
         filename: 'val.txt'
-        preprocess_config: *preprocess_config
-        train_config: *train_config
+        filetype: 'val'
 
 
 lightning:

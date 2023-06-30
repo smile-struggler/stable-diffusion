@@ -202,20 +202,34 @@ class DataModuleFromConfig(pl.LightningDataModule):
             init_fn = worker_init_fn
         else:
             init_fn = None
-        return DataLoader(self.datasets["train"], batch_size=self.batch_size,
-                          num_workers=self.num_workers, shuffle=False if is_iterable_dataset else True,
-                          worker_init_fn=init_fn, collate_fn=self.datasets["train"].collate_fn)
+
+        if hasattr(self.datasets["train"], 'collate_fn'):
+            return DataLoader(self.datasets["train"], batch_size=self.batch_size,
+                              num_workers=self.num_workers, shuffle=False if is_iterable_dataset else True,
+                              worker_init_fn=init_fn, collate_fn=self.datasets["train"].collate_fn)
+        else:
+            return DataLoader(self.datasets["train"], batch_size=self.batch_size,
+                              num_workers=self.num_workers, shuffle=False if is_iterable_dataset else True,
+                              worker_init_fn=init_fn)
 
     def _val_dataloader(self, shuffle=False):
         if isinstance(self.datasets['validation'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
             init_fn = worker_init_fn
         else:
             init_fn = None
-        return DataLoader(self.datasets["validation"],
-                          batch_size=self.batch_size,
-                          num_workers=self.num_workers,
-                          worker_init_fn=init_fn,
-                          shuffle=shuffle, collate_fn=self.datasets["validation"].collate_fn)
+
+        if hasattr(self.datasets["validation"], 'collate_fn'):
+            return DataLoader(self.datasets["validation"],
+                            batch_size=self.batch_size,
+                            num_workers=self.num_workers,
+                            worker_init_fn=init_fn,
+                            shuffle=shuffle, collate_fn=self.datasets["validation"].collate_fn)
+        else:
+            return DataLoader(self.datasets["validation"],
+                            batch_size=self.batch_size,
+                            num_workers=self.num_workers,
+                            worker_init_fn=init_fn,
+                            shuffle=shuffle)
 
     def _test_dataloader(self, shuffle=False):
         is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
@@ -227,18 +241,27 @@ class DataModuleFromConfig(pl.LightningDataModule):
         # do not shuffle dataloader for iterable dataset
         shuffle = shuffle and (not is_iterable_dataset)
 
-        return DataLoader(self.datasets["test"], batch_size=self.batch_size,
-                          num_workers=self.num_workers, worker_init_fn=init_fn, shuffle=shuffle, 
-                          collate_fn=self.datasets["test"].collate_fn)
+        if hasattr(self.datasets["test"], 'collate_fn'):
+            return DataLoader(self.datasets["test"], batch_size=self.batch_size,
+                            num_workers=self.num_workers, worker_init_fn=init_fn, shuffle=shuffle, 
+                            collate_fn=self.datasets["test"].collate_fn)
+        else:
+            return DataLoader(self.datasets["test"], batch_size=self.batch_size,
+                            num_workers=self.num_workers, worker_init_fn=init_fn, shuffle=shuffle)
 
     def _predict_dataloader(self, shuffle=False):
         if isinstance(self.datasets['predict'], Txt2ImgIterableBaseDataset) or self.use_worker_init_fn:
             init_fn = worker_init_fn
         else:
             init_fn = None
-        return DataLoader(self.datasets["predict"], batch_size=self.batch_size,
-                          num_workers=self.num_workers, worker_init_fn=init_fn, 
-                          collate_fn=self.datasets["predict"].collate_fn)
+
+        if hasattr(self.datasets["predict"], 'collate_fn'):
+            return DataLoader(self.datasets["predict"], batch_size=self.batch_size,
+                            num_workers=self.num_workers, worker_init_fn=init_fn, 
+                            collate_fn=self.datasets["predict"].collate_fn)
+        else:
+            return DataLoader(self.datasets["predict"], batch_size=self.batch_size,
+                            num_workers=self.num_workers, worker_init_fn=init_fn)
 
 
 class SetupCallback(Callback):
@@ -534,7 +557,6 @@ if __name__ == "__main__":
             cpu = False
         trainer_opt = argparse.Namespace(**trainer_config)
         lightning_config.trainer = trainer_config
-
         # model
         model = instantiate_from_config(config.model)
 
@@ -660,6 +682,11 @@ if __name__ == "__main__":
 
         trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
 
+        if 'max_epochs' not in config.model:
+            trainer_kwargs["max_epochs"] = -1
+        else:
+            trainer_kwargs["max_epochs"] = config.model.max_epochs
+
         trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
         trainer.logdir = logdir  ###
 
@@ -703,7 +730,7 @@ if __name__ == "__main__":
             if trainer.global_rank == 0:
                 print("Summoning checkpoint.")
                 ckpt_path = os.path.join(ckptdir, "last.ckpt")
-                trainer.save_checkpoint(ckpt_path)
+                trainer.save_checkpoint(ckpt_path, weights_only=True)
 
 
         def divein(*args, **kwargs):

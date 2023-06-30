@@ -109,7 +109,7 @@ class LibriTTSSpecs(Dataset):
         durations = [data[idx]["duration"] for idx in idxs]
 
         ori_mel_lens = max(np.array([mel.shape[0] for mel in mels]))
-        scale_num = 32
+        scale_num = 16
         if ori_mel_lens % scale_num != 0:
             new_mel_lens = (ori_mel_lens // scale_num) * scale_num + scale_num
         else:

@@ -2,9 +2,11 @@ logs/
 outputs/
 mel_files/
 __pycache__/
+process_logs/
 
 *.wav
 *.png
 *.npy
 *.pt
 *.ckpt
+/*.sh
